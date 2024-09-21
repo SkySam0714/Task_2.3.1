@@ -5,64 +5,42 @@ import models.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
-import util.Util;
+import org.springframework.stereotype.Repository;
 
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 
+@Repository
 public class UserDaoHibernateImpl implements UserDao {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private static final Logger LOGGER = LogManager.getLogger("Dao");
 
 
-    public UserDaoHibernateImpl() {
-    }
-
-
     @Override
-    public void createUser(String name, String surname, byte age) {
-        try (Session session = Util.getSessionFactory().openSession()) {
-            session.beginTransaction();
-            session.save(new User(name,surname,age));
-            session.getTransaction().commit();
-            LOGGER.info("User с именем – " + name + " добавлен в базу данных");
-        }
+    public List<User> getAllUsers() {
+        return entityManager.createQuery("SELECT user FROM User user", User.class).getResultList();
     }
+
 
     @Override
     public void createUser(User user) {
-        try (Session session = Util.getSessionFactory().openSession()) {
-            session.beginTransaction();
-            session.save(user);
-            session.getTransaction().commit();
-            LOGGER.info("User с именем – " + user.getName() + " добавлен в базу данных");
-        }
-    }
-
-    @Override
-    public List<User> getAllUsers() {
-        try (Session session = Util.getSessionFactory().openSession()) {
-            return session.createQuery("SELECT user FROM User user", User.class).getResultList();
-        }
+        entityManager.persist(user);
     }
 
     @Override
     public void updateUser(User user) {
-        try (Session session = Util.getSessionFactory().openSession()) {
-            session.beginTransaction();
-            session.update(user);
-            session.getTransaction().commit();
-            LOGGER.info("User with id: " + user.getId() + " - was changed");
-        }
+        entityManager.merge(user);
     }
 
     @Override
     public void deleteUserById(long id) {
-        try (Session session = Util.getSessionFactory().openSession()) {
-            session.beginTransaction();
-            session.createQuery("DELETE User WHERE id = :id").setParameter("id", id).executeUpdate();
-            session.getTransaction().commit();
-            LOGGER.info("User with id: " + id + " - was removed from database");
-        }
+        entityManager.createQuery("delete from User user where user.id=:id")
+                .setParameter("id", id)
+                .executeUpdate();
     }
-
 }

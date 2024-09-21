@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface UserDao {
 
-    void createUser(String name, String surname, byte age);
-
     void createUser(User user);
 
     List<User> getAllUsers();

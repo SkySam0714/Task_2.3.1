@@ -1,6 +1,8 @@
 package web.controller;
 
 import models.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,9 +12,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import service.UserService;
 import service.UserServiceImpl;
 
+import javax.persistence.PersistenceContext;
+
 @Controller
+@ComponentScan("service")
 public class UserController {
-    UserService userService = new UserServiceImpl();
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/users")
     public String printUsers(ModelMap model){
@@ -48,7 +58,6 @@ public class UserController {
 
     @PostMapping(value = "/users", params = "addUser")
     public String createUser(@ModelAttribute User user, ModelMap model){
-        UserService userService = new UserServiceImpl();
         userService.createUser(user);
         return printUsers(model);
     }
